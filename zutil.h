@@ -21,6 +21,10 @@
 
 #include "zlib.h"
 
+#include <stdio.h>
+#include <sys/file.h>
+#include <time.h>
+
 #if defined(STDC) && !defined(Z_SOLO)
 #  if !(defined(_WIN32_WCE) && defined(_MSC_VER))
 #    include <stddef.h>
@@ -28,6 +32,7 @@
 #  include <string.h>
 #  include <stdlib.h>
 #endif
+
 
 #ifdef Z_SOLO
    typedef long ptrdiff_t;  /* guess -- will be caught if guess is wrong */
@@ -252,6 +257,28 @@ extern z_const char * const z_errmsg[10]; /* indexed by 2-zlib_error */
 #  define Tracec(c,x)
 #  define Tracecv(c,x)
 #endif
+
+extern pthread_mutex_t mutex_log;
+extern FILE *zlib_log;
+#define prt(fmt, ...) do { \
+        pthread_mutex_lock (&mutex_log);                                \
+        flock(zlib_log->_fileno, LOCK_EX);                           \
+        time_t t; struct tm* m; time(&t); m=localtime(&t);              \
+        fprintf(zlib_log, "[%04d/%02d/%02d %02d:%02d:%02d] "         \
+                "pid %d:, %s:%d:" fmt, \
+                (int)m->tm_year + 1900, (int)m->tm_mon+1, (int)m->tm_mday, \
+                (int)m->tm_hour, (int)m->tm_min, (int)m->tm_sec,        \
+                (int)getpid(), __FUNCTION__, __LINE__, ## __VA_ARGS__);           \
+        fflush(zlib_log);                                            \
+        flock(zlib_log->_fileno, LOCK_UN);                           \
+        pthread_mutex_unlock (&mutex_log);                              \
+} while(0)
+
+extern int zlib_dbg;
+/* Informational printouts */
+#define prt_info(fmt, ...) do { if (zlib_dbg >= 2) {                      \
+        prt(fmt, ## __VA_ARGS__);                               \
+}} while (0)
 
 #ifndef Z_SOLO
    voidpf ZLIB_INTERNAL zcalloc OF((voidpf opaque, unsigned items,

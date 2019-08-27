@@ -10,6 +10,23 @@
 #  include "gzguts.h"
 #endif
 
+#include <assert.h>
+#include <pthread.h>
+
+FILE *zlib_log = NULL;
+pthread_mutex_t mutex_log = PTHREAD_MUTEX_INITIALIZER;
+int zlib_dbg = 2; /* turn on/off the trace */
+
+static void _zlib_init(void) __attribute__((constructor));
+
+static void _zlib_init(void)
+{
+    /* open the log file */
+    if (zlib_log == NULL)
+	zlib_log = fopen("/tmp/zlib_debug.log", "a+");
+    assert(zlib_log != NULL);
+}
+
 z_const char * const z_errmsg[10] = {
     (z_const char *)"need dictionary",     /* Z_NEED_DICT       2  */
     (z_const char *)"stream end",          /* Z_STREAM_END      1  */

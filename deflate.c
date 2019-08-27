@@ -252,6 +252,8 @@ int ZEXPORT deflateInit2_(strm, level, method, windowBits, memLevel, strategy,
     int wrap = 1;
     static const char my_version[] = ZLIB_VERSION;
 
+    prt_info("windowBits: %d\n", windowBits);
+
     ushf *overlay;
     /* We overlay pending_buf and d_buf+l_buf. This works since the average
      * output size for (length,distance) codes is <= 24 bits.
@@ -343,7 +345,7 @@ int ZEXPORT deflateInit2_(strm, level, method, windowBits, memLevel, strategy,
     s->level = level;
     s->strategy = strategy;
     s->method = (Byte)method;
-
+	
     return deflateReset(strm);
 }
 
@@ -384,6 +386,9 @@ int ZEXPORT deflateSetDictionary (strm, dictionary, dictLength)
     unsigned avail;
     z_const unsigned char *next;
 
+    prt_info("avail_in: %lu, avail_out: %lu, total_in: %lu, total_out: %lu, next_in: 0x%p, next_out: 0x%p, wrap: %d\n",
+	strm->avail_in, strm->avail_out, strm->total_in, strm->total_out, strm->next_in, strm->next_out, strm->state->wrap);
+    
     if (deflateStateCheck(strm) || dictionary == Z_NULL)
         return Z_STREAM_ERROR;
     s = strm->state;
@@ -438,6 +443,9 @@ int ZEXPORT deflateSetDictionary (strm, dictionary, dictLength)
     strm->next_in = next;
     strm->avail_in = avail;
     s->wrap = wrap;
+    
+    prt_info("avail_in: %lu, avail_out: %lu, total_in: %lu, total_out: %lu, next_in: 0x%p, next_out: 0x%p, wrap: %d, adler: %lu\n",
+	strm->avail_in, strm->avail_out, strm->total_in, strm->total_out, strm->next_in, strm->next_out, strm->state->wrap, strm->adler);
     return Z_OK;
 }
 
@@ -460,6 +468,7 @@ int ZEXPORT deflateGetDictionary (strm, dictionary, dictLength)
         zmemcpy(dictionary, s->window + s->strstart + s->lookahead - len, len);
     if (dictLength != Z_NULL)
         *dictLength = len;
+    prt_info("dictLength: %lu\n", len);
     return Z_OK;
 }
 
@@ -510,6 +519,9 @@ int ZEXPORT deflateReset (strm)
     ret = deflateResetKeep(strm);
     if (ret == Z_OK)
         lm_init(strm->state);
+
+    prt_info("avail_in: %lu, avail_out: %lu, total_in: %lu, total_out: %lu, next_in: 0x%p, next_out: 0x%p, wrap: %d\n",
+	strm->avail_in, strm->avail_out, strm->total_in, strm->total_out, strm->next_in, strm->next_out, strm->state->wrap);
     return ret;
 }
 
@@ -771,6 +783,9 @@ int ZEXPORT deflate (strm, flush)
         return Z_STREAM_ERROR;
     }
     s = strm->state;
+
+    prt_info("avail_in: %lu, avail_out: %lu, total_in: %lu, total_out: %lu, next_in: 0x%p, next_out: 0x%p, wrap: %d\n",
+	strm->avail_in, strm->avail_out, strm->total_in, strm->total_out, strm->next_in, strm->next_out, s->wrap);
 
     if (strm->next_out == Z_NULL ||
         (strm->avail_in != 0 && strm->next_in == Z_NULL) ||
@@ -1043,6 +1058,9 @@ int ZEXPORT deflate (strm, flush)
         }
     }
 
+    prt_info("avail_in: %lu, avail_out: %lu, total_in: %lu, total_out: %lu, next_in: 0x%p, next_out: 0x%p, wrap: %d\n",
+	strm->avail_in, strm->avail_out, strm->total_in, strm->total_out, strm->next_in, strm->next_out, s->wrap);
+    
     if (flush != Z_FINISH) return Z_OK;
     if (s->wrap <= 0) return Z_STREAM_END;
 
@@ -1077,6 +1095,9 @@ int ZEXPORT deflateEnd (strm)
     z_streamp strm;
 {
     int status;
+
+    prt_info("avail_in: %lu, avail_out: %lu, total_in: %lu, total_out: %lu, next_in: 0x%p, next_out: 0x%p, status: %d\n",
+	strm->avail_in, strm->avail_out, strm->total_in, strm->total_out, strm->next_in, strm->next_out, strm->state->status);
 
     if (deflateStateCheck(strm)) return Z_STREAM_ERROR;
 

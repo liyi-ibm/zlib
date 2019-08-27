@@ -138,6 +138,8 @@ z_streamp strm;
     state->sane = 1;
     state->back = -1;
     Tracev((stderr, "inflate: reset\n"));
+    prt_info("avail_in: %lu, avail_out: %lu, total_in: %lu, total_out: %lu, next_in: 0x%p, next_out: 0x%p, wrap: %d\n",
+        strm->avail_in, strm->avail_out, strm->total_in, strm->total_out, strm->next_in, strm->next_out, state->wrap);
     return Z_OK;
 }
 
@@ -201,6 +203,7 @@ int stream_size;
     int ret;
     struct inflate_state FAR *state;
 
+    prt_info("windowBits: %d\n", windowBits);
     if (version == Z_NULL || version[0] != ZLIB_VERSION[0] ||
         stream_size != (int)(sizeof(z_stream)))
         return Z_VERSION_ERROR;
@@ -641,6 +644,9 @@ int flush;
 #endif
     static const unsigned short order[19] = /* permutation of code lengths */
         {16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
+
+    prt_info("avail_in: %lu, avail_out: %lu, total_in: %lu, total_out: %lu, next_in: 0x%p, next_out: 0x%p, wrap: %d\n",
+        strm->avail_in, strm->avail_out, strm->total_in, strm->total_out, strm->next_in, strm->next_out, ((struct inflate_state FAR *)strm->state)->wrap);
 
     if (inflateStateCheck(strm) || strm->next_out == Z_NULL ||
         (strm->next_in == Z_NULL && strm->avail_in != 0))
@@ -1271,6 +1277,9 @@ int flush;
                       (state->mode == LEN_ || state->mode == COPY_ ? 256 : 0);
     if (((in == 0 && out == 0) || flush == Z_FINISH) && ret == Z_OK)
         ret = Z_BUF_ERROR;
+
+    prt_info("avail_in: %lu, avail_out: %lu, total_in: %lu, total_out: %lu, next_in: 0x%p, next_out: 0x%p, wrap: %d\n",
+        strm->avail_in, strm->avail_out, strm->total_in, strm->total_out, strm->next_in, strm->next_out, ((struct inflate_state FAR *)strm->state)->wrap);
     return ret;
 }
 
@@ -1278,6 +1287,10 @@ int ZEXPORT inflateEnd(strm)
 z_streamp strm;
 {
     struct inflate_state FAR *state;
+    
+    prt_info("avail_in: %lu, avail_out: %lu, total_in: %lu, total_out: %lu, next_in: 0x%p, next_out: 0x%p, wrap: %d\n",
+        strm->avail_in, strm->avail_out, strm->total_in, strm->total_out, strm->next_in, strm->next_out, ((struct inflate_state FAR *)strm->state)->wrap);
+    
     if (inflateStateCheck(strm))
         return Z_STREAM_ERROR;
     state = (struct inflate_state FAR *)strm->state;
@@ -1308,6 +1321,7 @@ uInt *dictLength;
     }
     if (dictLength != Z_NULL)
         *dictLength = state->whave;
+    prt_info("dictLenght: %lu\n", *dictLength);
     return Z_OK;
 }
 
@@ -1320,6 +1334,9 @@ uInt dictLength;
     unsigned long dictid;
     int ret;
 
+    prt_info("avail_in: %lu, avail_out: %lu, total_in: %lu, total_out: %lu, next_in: 0x%p, next_out: 0x%p, wrap: %d\n",
+        strm->avail_in, strm->avail_out, strm->total_in, strm->total_out, strm->next_in, strm->next_out, ((struct inflate_state FAR *)strm->state)->wrap);
+    
     /* check state */
     if (inflateStateCheck(strm)) return Z_STREAM_ERROR;
     state = (struct inflate_state FAR *)strm->state;
@@ -1343,6 +1360,10 @@ uInt dictLength;
     }
     state->havedict = 1;
     Tracev((stderr, "inflate:   dictionary set\n"));
+    
+    prt_info("avail_in: %lu, avail_out: %lu, total_in: %lu, total_out: %lu, next_in: 0x%p, next_out: 0x%p, wrap: %d\n",
+        strm->avail_in, strm->avail_out, strm->total_in, strm->total_out, strm->next_in, strm->next_out, ((struct inflate_state FAR *)strm->state)->wrap);
+    prt_info("dictionary set: dictid: %lu\n", dictid);   
     return Z_OK;
 }
 
